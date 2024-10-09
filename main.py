@@ -18,22 +18,7 @@ headers = {
     "Content-Type": "application/json"
 }
 
-# Lista de proxies
-proxies_list = [
-    "https://spchdses18:fyTmb5szFC5_z8le3Q@gate.smartproxy.com:10001",
-    "https://spchdses18:fyTmb5szFC5_z8le3Q@gate.smartproxy.com:10002",
-    "https://spchdses18:fyTmb5szFC5_z8le3Q@gate.smartproxy.com:10003",
-    "https://spchdses18:fyTmb5szFC5_z8le3Q@gate.smartproxy.com:10004",
-    "https://spchdses18:fyTmb5szFC5_z8le3Q@gate.smartproxy.com:10005",
-    "https://spchdses18:fyTmb5szFC5_z8le3Q@gate.smartproxy.com:10006",
-    "https://spchdses18:fyTmb5szFC5_z8le3Q@gate.smartproxy.com:10007",
-    "https://spchdses18:fyTmb5szFC5_z8le3Q@gate.smartproxy.com:10008",
-    "https://spchdses18:fyTmb5szFC5_z8le3Q@gate.smartproxy.com:10009",
-    "https://spchdses18:fyTmb5szFC5_z8le3Q@gate.smartproxy.com:10010"
-]
-
 # Set para rastrear proxies bloqueados
-blocked_proxies = {}
 
 def fetch_data(url, data):
     """Função para fazer requisições POST e retornar os dados."""
@@ -41,43 +26,24 @@ def fetch_data(url, data):
     retries = 0
     
     while retries < max_retries:
-        available_proxies = [proxy for proxy in proxies_list if proxy not in blocked_proxies]
-        
-        if not available_proxies:
-            print("Todos os proxies estão bloqueados. Aguardando 120 segundos.")
-            time.sleep(120)
-            blocked_proxies.clear()
-            continue
-        
-        proxy = random.choice(available_proxies)
-        proxies = {"https": proxy}
         
         try:
-            response = requests.post(url, headers=headers, data=json.dumps(data), proxies=proxies)
+            response = requests.post(url, headers=headers, data=json.dumps(data))
             if response.status_code == 200:
                 return response.json()
             elif response.status_code == 429:
-                print(f"Erro 429 com proxy {proxy}. Adicionando ao bloqueio por 120 segundos.")
-                blocked_proxies[proxy] = time.time() + 120
-                time.sleep(5)  # Espera breve antes de tentar outro proxy
+                time.sleep(120)  # Espera breve antes de tentar outro proxy
             else:
-                print(f"Erro na requisição: {response.status_code} com proxy {proxy}")
+                print(f"Erro na requisição: {response.status_code} ")
                 return {}
         except requests.exceptions.RequestException as e:
-            print(f"Exceção ao fazer a requisição: {e} com proxy {proxy}")
+            print(f"Exceção ao fazer a requisição: {e}")
             return {}
 
         retries += 1
 
     print("Número máximo de tentativas atingido. Abortando.")
     return {}
-
-def check_blocked_proxies():
-    """Remove proxies do bloqueio após o tempo especificado."""
-    current_time = time.time()
-    for proxy in list(blocked_proxies.keys()):
-        if blocked_proxies[proxy] <= current_time:
-            del blocked_proxies[proxy]
 
 def get_marca(tabela_referencia):
     data = {
@@ -168,10 +134,10 @@ veiculos = [
 ]
 veiculos_upper = [veiculo.strip().replace(' ', '').replace('í', 'i').replace('.', '').upper() for veiculo in veiculos]
 marcas_permitidas_upper = [marca.strip().replace(' ', '').replace('í', 'i').replace('.', '').upper() for marca in marcas_permitidas]
+
 tabelas_referencia = list(range(298, 315))  # Mes
 
 for tabela in tabelas_referencia:
-    check_blocked_proxies()  # Verifica e remove proxies bloqueados
     marcas = get_marca(tabela)
     if marcas:
         for item in marcas:
