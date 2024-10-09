@@ -72,17 +72,25 @@ def get_ano(tabela_referencia, codigo_marca, codigo_modelo):
     return fetch_data(url_ano, data)
 
 def get_final(tabela_referencia, codigo_marca, codigo_modelo, codigo_ano):
+    
     ano = codigo_ano.split('-')[0]
+    
+    if codigo_modelo == 2241:
+        codigoTipoCombustivel = 3
+    else:
+        codigoTipoCombustivel = 1
+    
     data = {
         "codigoTabelaReferencia": tabela_referencia,
         "codigoTipoVeiculo": 1,
         "codigoMarca": codigo_marca,
-        "codigoTipoCombustivel": 1,
+        "codigoTipoCombustivel": codigoTipoCombustivel,
         "anoModelo": ano,
         "ano": codigo_ano,
         "codigoModelo": codigo_modelo,
         "tipoConsulta": "tradicional"
     }
+    
     return fetch_data(url_final, data)
 
 # Principal
@@ -150,28 +158,28 @@ for tabela in tabelas_referencia:
                         if modelo['Label'].replace(' ', '').replace('í', 'i').replace('.', '').strip().upper() in veiculos_upper:
                             anos = get_ano(tabela, item['Value'], modelo['Value'])
                             if anos:
-                                ano = anos[0]
-                                vehicle_data = get_final(tabela, item['Value'], modelo['Value'], ano['Value'])
-                                print(vehicle_data)
-                                resultados.append({
-                                            'codigoTabelaReferencia': tabela,
-                                            'nome_marca_carro': item['Label'],
-                                            'valor_marca_carro': item['Value'],
-                                            'nome_carro': modelo['Label'],
-                                            'valor_carro': modelo['Value'],
-                                            'nome_ano_carro': ano['Label'],
-                                            'valor_ano_carro': ano['Value'],
-                                            'codigo_fipe': vehicle_data.get('CodigoFipe', 'N/A'),
-                                            'nome_marca_carro_final': vehicle_data.get('Marca', 'N/A'),
-                                            'nome_carro_modelo': vehicle_data.get('Modelo', 'N/A'),
-                                            'valor_carro_fipe': vehicle_data.get('Valor', 'N/A'),
-                                            'ano_modelo_carro': vehicle_data.get('AnoModelo', 'N/A'),
-                                            'combustivel': vehicle_data.get('Combustivel', 'N/A'),
-                                            'mes_referencia': vehicle_data.get('MesReferencia', 'N/A'),
-                                            'data_consulta': vehicle_data.get('DataConsulta', 'N/A'),
-                                            'tipo_veiculo': vehicle_data.get('TipoVeiculo', 'N/A'),
-                                            'sigla_combustivel': vehicle_data.get('SiglaCombustivel', 'N/A')
-                                        })
+                                for ano in anos:
+                                    vehicle_data = get_final(tabela, item['Value'], modelo['Value'], ano['Value'])
+                                    print(vehicle_data)
+                                    resultados.append({
+                                                'codigoTabelaReferencia': tabela,
+                                                'nome_marca_carro': item['Label'],
+                                                'valor_marca_carro': item['Value'],
+                                                'nome_carro': modelo['Label'],
+                                                'valor_carro': modelo['Value'],
+                                                'nome_ano_carro': ano['Label'],
+                                                'valor_ano_carro': ano['Value'],
+                                                'codigo_fipe': vehicle_data.get('CodigoFipe', 'N/A'),
+                                                'nome_marca_carro_final': vehicle_data.get('Marca', 'N/A'),
+                                                'nome_carro_modelo': vehicle_data.get('Modelo', 'N/A'),
+                                                'valor_carro_fipe': vehicle_data.get('Valor', 'N/A'),
+                                                'ano_modelo_carro': vehicle_data.get('AnoModelo', 'N/A'),
+                                                'combustivel': vehicle_data.get('Combustivel', 'N/A'),
+                                                'mes_referencia': vehicle_data.get('MesReferencia', 'N/A'),
+                                                'data_consulta': vehicle_data.get('DataConsulta', 'N/A'),
+                                                'tipo_veiculo': vehicle_data.get('TipoVeiculo', 'N/A'),
+                                                'sigla_combustivel': vehicle_data.get('SiglaCombustivel', 'N/A')
+                                            })
 
 df_resultados = pd.DataFrame(resultados)
 df_resultados.to_csv('final.csv', index=False)
