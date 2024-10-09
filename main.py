@@ -2,7 +2,6 @@ import requests
 import json
 import pandas as pd
 import time
-import random
 
 # URLs da API
 API_BASE_URL = "http://veiculos.fipe.org.br/api/veiculos"
@@ -32,6 +31,7 @@ def fetch_data(url, data):
             if response.status_code == 200:
                 return response.json()
             elif response.status_code == 429:
+                print('entrou em p')
                 time.sleep(120)  # Espera breve antes de tentar outro proxy
             else:
                 print(f"Erro na requisição: {response.status_code} ")
@@ -135,12 +135,13 @@ veiculos = [
 veiculos_upper = [veiculo.strip().replace(' ', '').replace('í', 'i').replace('.', '').upper() for veiculo in veiculos]
 marcas_permitidas_upper = [marca.strip().replace(' ', '').replace('í', 'i').replace('.', '').upper() for marca in marcas_permitidas]
 
-tabelas_referencia = list(range(298, 315))  # Mes
+tabelas_referencia = list(range(249, 315))  # Mes
 
 for tabela in tabelas_referencia:
     marcas = get_marca(tabela)
-    if marcas:
+    if marcas and isinstance(marcas, list):
         for item in marcas:
+            print(item['Label'])
             if item['Label'].replace(' ', '').replace('í', 'i').replace('.', '').strip().upper() in marcas_permitidas_upper:
                 item['codigoTabelaReferencia'] = tabela
                 modelos = get_modelos(tabela, item['Value'])
