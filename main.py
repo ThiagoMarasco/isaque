@@ -73,7 +73,8 @@ def get_ano(tabela_referencia, codigo_marca, codigo_modelo):
 
 def get_final(tabela_referencia, codigo_marca, codigo_modelo, codigo_ano):
     
-    ano = codigo_ano.split('-')[0]
+    ano = codi
+    go_ano.split('-')[0]
     
     if codigo_modelo == 2241:
         codigoTipoCombustivel = 3
